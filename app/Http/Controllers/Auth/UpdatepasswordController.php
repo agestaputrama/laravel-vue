@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
 use App\Otp_code;
+use App\User;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class RegisterController extends Controller
+class UpdatepasswordController extends Controller
 {
     /**
      * Handle the incoming request.
@@ -20,29 +19,22 @@ class RegisterController extends Controller
     public function __invoke(Request $request)
     {
         request()->validate([
-            'name' => ['string', 'required'],
-            'email' => ['email', 'required', 'unique:users,email']
+            'email' => ['email', 'required'],
+            'password' => ['string', 'required'],
+            'password_confirmation' => ['string', 'same:password']
         ]);
-
-        User::create([
-            'name' => request('name'),
-            'email' => request('email'),
-        ]);
+        
 
         $user = User::where('email', request('email'))->first();
 
-        //save otp_code
-        Otp_code::create([
-            'user_id' => $user->id,
-            'code' => rand(100000, 999999),
-            'valid_until' => Carbon::now('Asia/Jakarta')->addMinute(5)
-        ]);
+        //update password
+        $user->password = bcrypt(request('password'));
+        $user->save();
 
         return response()->json([
             'response_code' => '00',
-            'response_message' => 'Silahkan Cek Email',
+            'response_message' => 'Password Berhasil Diubah',
             'user' => $user 
         ]);
     }
-
 }

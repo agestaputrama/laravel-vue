@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
 use App\Otp_code;
-use App\Http\Controllers\Controller;
+use App\User;
 use Carbon\Carbon;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class RegisterController extends Controller
+class RegenerateController extends Controller
 {
     /**
      * Handle the incoming request.
@@ -19,30 +19,29 @@ class RegisterController extends Controller
      */
     public function __invoke(Request $request)
     {
-        request()->validate([
-            'name' => ['string', 'required'],
-            'email' => ['email', 'required', 'unique:users,email']
-        ]);
-
-        User::create([
-            'name' => request('name'),
-            'email' => request('email'),
+        $request->validate([
+            'email' => ['email', 'required']
         ]);
 
         $user = User::where('email', request('email'))->first();
 
-        //save otp_code
-        Otp_code::create([
-            'user_id' => $user->id,
-            'code' => rand(100000, 999999),
-            'valid_until' => Carbon::now('Asia/Jakarta')->addMinute(5)
-        ]);
+        if(!$user){
+            return response()->json([
+                'response_code' => '01',
+                'response_message' => 'Email salah/tidak ditemukan'
+            ]);
+        }else{
+         //update otp_code
+         $otp = Otp_code::where('user_id', $user->id)->first();
+         $otp->code = rand(100000, 999999);
+         $otp->valid_until = Carbon::now('Asia/Jakarta')->addMinute(5);
+         $otp->save();
 
         return response()->json([
             'response_code' => '00',
             'response_message' => 'Silahkan Cek Email',
             'user' => $user 
         ]);
+      }
     }
-
 }
