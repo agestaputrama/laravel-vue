@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Otp_code;
 use App\User;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\UserRegisteredEvent;
 
 class RegenerateController extends Controller
 {
@@ -32,14 +31,17 @@ class RegenerateController extends Controller
             ]);
         }else{
          //update otp_code
-         $otp = Otp_code::where('user_id', $user->id)->first();
-         $otp->code = rand(100000, 999999);
-         $otp->valid_until = Carbon::now('Asia/Jakarta')->addMinute(5);
-         $otp->save();
+         $user->generate_otp_code();
+         event(new UserRegisteredEvent($user));
+
+        //  $otp = Otp_code::where('user_id', $user->id)->first();
+        //  $otp->code = rand(100000, 999999);
+        //  $otp->valid_until = Carbon::now('Asia/Jakarta')->addMinute(5);
+        //  $otp->save();
 
         return response()->json([
             'response_code' => '00',
-            'response_message' => 'Silahkan Cek Email',
+            'response_message' => 'Otp berhasil digenerate. Silahkan Cek Email',
             'user' => $user 
         ]);
       }

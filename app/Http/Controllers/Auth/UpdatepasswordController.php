@@ -20,13 +20,12 @@ class UpdatepasswordController extends Controller
     {
         request()->validate([
             'email' => ['email', 'required'],
-            'password' => ['string', 'required'],
-            'password_confirmation' => ['string', 'same:password']
+            'password' => ['string', 'required', 'min:6'],
+            'password_confirmation' => ['string', 'required', 'same:password']
         ]);
         
 
         $user = User::where('email', request('email'))->first();
-
         //update password
         $user->password = bcrypt(request('password'));
         $user->save();
@@ -35,6 +34,6 @@ class UpdatepasswordController extends Controller
             'response_code' => '00',
             'response_message' => 'Password Berhasil Diubah',
             'user' => $user 
-        ]);
+        ], 200);
     }
 }

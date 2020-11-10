@@ -30,23 +30,26 @@ class VerificationController extends Controller
             return response()->json([
                 'response_code' => '01',
                 'response_message' => 'Kode OTP salah/tidak ditemukan'
-            ]);
+            ], 200);
         }else if($now > $otp_code->valid_until){
             return response()->json([
                 'response_code' => '01',
                 'response_message' => 'Kode otp sudah tdak berlaku, silahkan generate ulang'
-            ]);
+            ], 200);
         }else {
             //update user
             $user = User::find($otp_code->user_id);
             $user->email_verified_at = $now;
             $user->save();
 
+            //delete otp
+            $otp_code->delete();
+
             return response()->json([
                 'response_code' => '00',
-                'response_message' => 'Berhasil di verifikasi',
+                'response_message' => 'Berhasil diverifikasi',
                 'user' => $user 
-            ]);
+            ], 200);
         
         }
 

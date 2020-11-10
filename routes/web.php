@@ -11,19 +11,19 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
-Auth::routes();
+// Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+// Route::get('/home', 'HomeController@index')->name('home');
 
-Route::middleware(['auth', 'admin', 'email'])->group(function(){
-    Route::get('/route-2', 'TestController@verified');
-});
+// Route::middleware(['auth', 'admin', 'email'])->group(function(){
+//     Route::get('/route-2', 'TestController@verified');
+// });
 
-Route::middleware(['auth', 'email'])->group(function(){
-    Route::get('/route-1', 'TestController@user');
-});
+// Route::middleware(['auth', 'email'])->group(function(){
+//     Route::get('/route-1', 'TestController@user');
+// });
 

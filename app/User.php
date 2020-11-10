@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PhpParser\Builder\Function_;
 use App\Traits\UsesUuid;
+use App\Otp_code;
+use Carbon\Carbon;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -26,30 +28,26 @@ class User extends Authenticatable implements JWTSubject
         static::creating(function ($model){
             $model->role_id = $model->get_user_id();
         });
+
+        static::created(function ($model){
+            $model->generate_otp_code();
+        });
     }
 
-   
+    public function generate_otp_code(){
+        do{
+            $random = mt_rand(100000, 999999);
+            $check = Otp_code::where('code', $random)->first();
+        }while ($check);
 
-//start setting uuid
-    // protected static function boot() {
-    //     parent::boot();
-    //     static::creating(function ($model) {
-    //         if ( ! $model->getKey()) {
-    //             $model->{$model->getKeyName()} = (string) Str::uuid();
-    //         }
-    //     });
-    // }
+        $now = Carbon::now('Asia/Jakarta');
 
-    // public function getIncrementing()
-    // {
-    //     return false;
-    // }
-
-    // public function getKeyType()
-    // {
-    //     return 'string';
-    // }
-//end membuat uuid
+        //create otp code
+        $otp_code = Otp_code::updateOrCreate(
+            ['user_id' => $this->id],
+            ['code' => $random, 'valid_until' => $now->addMinutes(5)]
+        );
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -84,20 +82,6 @@ class User extends Authenticatable implements JWTSubject
 
     public function Otp_code(){
         return $this->hasOne('App\Otp_code');
-    }
-
-    public function isAdmin(){
-        if($this->role_id == '39d2033b-0fac-477c-98cd-a8aaed75cfb8'){
-            return true;
-        }
-        return false;
-    }
-
-    public function isUser(){
-        if($this->role_id == 'fb26e33b-8a1f-4ead-8327-918ccd7d1b96'){
-            return true;
-        }
-        return false;
     }
 
      /**

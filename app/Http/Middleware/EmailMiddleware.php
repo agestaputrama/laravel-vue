@@ -16,9 +16,12 @@ class EmailMiddleware
      */
     public function handle($request, Closure $next)
     { 
-        if(Auth::user()->email_verified_at != null){
+    
+        if(Auth::user()->password != null && Auth::user()->email_verified_at != null){
             return $next($request);
         }
-        abort(403);
+        return response()->json([
+            'message' => 'Email Anda Belum Terverifikasi'
+        ]);
     }
 }
